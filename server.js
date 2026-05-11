@@ -364,7 +364,19 @@ const sendNotification = async (customBody, clientIp) => {
 };
 
 // Manual notify endpoint
-app.get("/notify", verifyToken, async (req, res) => {
+app.get("/notify", async (req, res) => {
+  let user = null;
+  const authHeader = req.headers["authorization"];
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : (req.query.token || null);
+
+  if (token && token !== "null" && token !== "undefined") {
+    try {
+      user = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      log(`Invalid token in /notify: ${err.message}`);
+    }
+  }
+
   const clientIp =
     req.headers["x-forwarded-for"]?.split(",")[0].trim() || req.ip;
   if (
@@ -378,10 +390,11 @@ app.get("/notify", verifyToken, async (req, res) => {
       ip: clientIp,
     });
   }
-  log(`Received GET /notify from IP: ${clientIp}`);
+  log(`Received GET /notify from IP: ${clientIp} (Auth: ${user ? "Yes" : "No"})`);
   try {
+    const notificationMessage = user ? "Manual notification triggered" : "unauth user notifing";
     const result = await sendNotification(
-      "Manual notification triggered",
+      notificationMessage,
       clientIp
     );
     res.status(200).json({ success: true, ...result, ip: clientIp });
