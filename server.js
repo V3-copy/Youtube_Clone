@@ -47,10 +47,13 @@ admin.initializeApp({
 });
 
 
+const compression = require("compression");
+
 const app = express();
 const server = http.createServer(app);
 app.set("trust proxy", true);
 app.use(cors());
+app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 
 // Auth API
