@@ -259,6 +259,8 @@ async function getMediaFiles(dir, baseUrlPath) {
     ".mp4",
     ".webm",
     ".mov",
+    ".heic",
+    ".hevc",
   ];
   try {
     const files = await fs.promises.readdir(dir);
