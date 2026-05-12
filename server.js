@@ -64,9 +64,10 @@ app.post("/auth/login", (req, res) => {
 
   if (isAllowedEmail && isAllowedPassword) {
     const workspace = (email === ALLOWED_EMAIL_1 || email === ALLOWED_EMAIL_2) ? "production" : "test";
-    const accessToken = jwt.sign({ email, workspace }, JWT_SECRET, { expiresIn: "15m" });
-    const refreshToken = jwt.sign({ email, workspace }, JWT_REFRESH_SECRET, { expiresIn: "7d" });
-    res.json({ accessToken, refreshToken, user: { email, workspace } });
+    const permissions = workspace === "production" ? ["CAN_DOWNLOAD_MULTIPLE"] : [];
+    const accessToken = jwt.sign({ email, workspace, permissions }, JWT_SECRET, { expiresIn: "15m" });
+    const refreshToken = jwt.sign({ email, workspace, permissions }, JWT_REFRESH_SECRET, { expiresIn: "7d" });
+    res.json({ accessToken, refreshToken, user: { email, workspace, permissions } });
   } else {
     res.status(401).json({ error: "Unauthorized" });
   }
@@ -88,7 +89,11 @@ app.post("/auth/refresh", (req, res) => {
 
   jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err, user) => {
     if (err) return res.status(403).json({ error: "Invalid refresh token" });
-    const accessToken = jwt.sign({ email: user.email, workspace: user.workspace }, JWT_SECRET, { expiresIn: "15m" });
+    const accessToken = jwt.sign(
+      { email: user.email, workspace: user.workspace, permissions: user.permissions || [] },
+      JWT_SECRET,
+      { expiresIn: "15m" }
+    );
     res.json({ accessToken });
   });
 });
