@@ -23,3 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Uploads
+uploads/production/*
+!uploads/production/.gitkeep
+uploads/test/*
+!uploads/test/.gitkeep
+private_uploads/production/*
+!private_uploads/production/.gitkeep
+private_uploads/test/*
+!private_uploads/test/.gitkeep
